@@ -15,6 +15,7 @@ import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.SimpleCursorAdapter;
 import android.widget.Spinner;
+import android.widget.Toast;
 
 import com.example.asm.R;
 import com.example.asm.databases.DBHelper;
@@ -36,6 +37,7 @@ public class FragmentManage extends Fragment implements View.OnClickListener {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+        // Inflate the layout for this fragment
         View itemRoot = inflater.inflate(R.layout.expenditures, container, false);
         initView(itemRoot);
         return itemRoot;
@@ -51,7 +53,6 @@ public class FragmentManage extends Fragment implements View.OnClickListener {
         btnCreate = itemRoot.findViewById(R.id.btnCreate);
         spCategory = itemRoot.findViewById(R.id.spCategory);
         dbHelper = new DBHelper(this.getContext());
-
         Cursor cursor = dbHelper.getAllCategories();
         ArrayList<String> categories = this.getCategories(cursor);
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this.getContext(), R.layout.support_simple_spinner_dropdown_item, categories);
@@ -72,19 +73,36 @@ public class FragmentManage extends Fragment implements View.OnClickListener {
 
     @Override
     public void onClick(View view) {
-
+        if (view.getId() == R.id.btnCreate) {
+            onCreate();
+        }
     }
 
-    private ArrayList<String> getCategories(Cursor cursor) {
+    private ArrayList<String> getCategories(Cursor cursor){
 
         ArrayList<String> categories = new ArrayList<String>();
-        if (cursor != null) {
+        if (cursor != null)
+        {
             while (cursor.moveToNext()) {
                 categories.add(cursor.getString(cursor.getColumnIndex("name")));
             }
             cursor.close();
         }
         return categories;
+    }
+
+    private void onCreate() {
+        if (edName.getText().toString().isEmpty()) {
+            Toast.makeText(this.getContext(), "Please enter name", Toast.LENGTH_LONG).show();
+            return;
+        }
+        if (edMoney.getText().toString().isEmpty()) {
+            Toast.makeText(this.getContext(), "Please enter money", Toast.LENGTH_LONG).show();
+            return;
+        }
+        String isAdd = dbHelper.addPayment(edName.getText().toString(), spCategory.getSelectedItem().toString(),
+                edDetail.getText().toString(), datePicker.getDayOfMonth()+"-"+datePicker.getMonth()+"-"+datePicker.getYear(), edMoney.getText().toString(), edDescription.getText().toString());
+        Toast.makeText(this.getContext(), isAdd, Toast.LENGTH_SHORT).show();
     }
 
 }

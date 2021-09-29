@@ -20,6 +20,7 @@ public class DBHelper extends SQLiteOpenHelper {
     public static final String AMOUNT = "amount";
     public static final String DESCRIPTION = "description";
     public static final String PAYMENT_DATE = "payment_date";
+    public static final String CATEGORY_NAME = "category_name";
 
 
     public DBHelper(@Nullable Context context) {
@@ -28,30 +29,22 @@ public class DBHelper extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase sqLiteDatabase) {
-        String sqlPayment = "CREATE TABLE " +
-                PAYMENTS_TABLE + "( " +
+        String sqlPayment = "CREATE TABLE " + PAYMENTS_TABLE + "( " +
                 ID + " INTEGER PRIMARY KEY, " +
-                CATEGORY_ID + " INTEGER," +
+                CATEGORY_NAME + " TEXT," +
                 NAME + " TEXT, " +
                 PAYMENT_DATE + "DATE," +
                 DETAIL + " TEXT, " +
                 AMOUNT + " REAL, " +
-                DESCRIPTION + " TEXT," +
-                " FOREIGN KEY( " +
-                CATEGORY_ID + ")" + " REFERENCES " +
-                CATEGORIES_TABLE_NAME + "(" +
-                ID + "));";
+                DESCRIPTION + " TEXT);";
         sqLiteDatabase.execSQL(sqlPayment);
 
-        String sqlCategory = "CREATE TABLE " +
-                CATEGORIES_TABLE_NAME + "( " +
+        String sqlCategory = "CREATE TABLE " + CATEGORIES_TABLE_NAME + "( " +
                 ID + " INTEGER PRIMARY KEY, " +
                 NAME + " TEXT);";
         sqLiteDatabase.execSQL(sqlCategory);
 
-        String sqlSeedCategory = "INSERT INTO " +
-                CATEGORIES_TABLE_NAME + " (" +
-                NAME + " ) VALUES"
+        String sqlSeedCategory = "INSERT INTO " + CATEGORIES_TABLE_NAME + " (" + NAME + " ) VALUES"
                 + "('Category 1')" +
                 ", ('Category 2')";
         sqLiteDatabase.execSQL(sqlSeedCategory);
@@ -67,7 +60,12 @@ public class DBHelper extends SQLiteOpenHelper {
         onCreate(sqLiteDatabase);
     }
 
-
+    public Cursor getAllPayments() {
+        SQLiteDatabase db = this.getReadableDatabase();
+        String sql = "SELECT * FROM " + PAYMENTS_TABLE;
+        Cursor cursor = db.rawQuery(sql, null);
+        return cursor;
+    }
 
     public Cursor getAllCategories() {
         SQLiteDatabase db = this.getReadableDatabase();
@@ -76,48 +74,21 @@ public class DBHelper extends SQLiteOpenHelper {
         return cursor;
     }
 
-    public String deleteCategory(int id) {
-        SQLiteDatabase db = this.getWritableDatabase();
-        int isDelete = db.delete(CATEGORIES_TABLE_NAME,
-                ID + " = ? ", new String[]{id + ""});
-        if (isDelete > 0) {
-            return "success";
-        }
-        db.close();
-        return "failed";
-    }
-
-    public String deletePayment(int id) {
-        SQLiteDatabase db = this.getWritableDatabase();
-        int isDelete = db.delete(PAYMENTS_TABLE,
-                ID + " = ? ", new String[]{id + ""});
-        if (isDelete > 0) {
-            return "success";
-        }
-        db.close();
-        return "failed";
-    }
-    public Cursor getAllPayments() {
-        SQLiteDatabase db = this.getReadableDatabase();
-        String sql = "SELECT * FROM " + PAYMENTS_TABLE;
-        Cursor cursor = db.rawQuery(sql, null);
-        return cursor;
-    }
-    public String addPayment(String name, int categoryId, String detail, String paymentDate, double amount, String description) {
+    public String addPayment(String name, String categoryName, String detail, String paymentDate, String amount, String description) {
         SQLiteDatabase db = this.getReadableDatabase();
         ContentValues contentValues = new ContentValues();
         contentValues.put(NAME, name);
-        contentValues.put(CATEGORY_ID, categoryId);
+        contentValues.put(CATEGORY_NAME, categoryName);
         contentValues.put(PAYMENT_DATE, paymentDate);
         contentValues.put(DETAIL, detail);
         contentValues.put(AMOUNT, amount);
         contentValues.put(DESCRIPTION, description);
         long isAdd = db.insert(PAYMENTS_TABLE, null, contentValues);
         if (isAdd == -1) {
-            return "Fail";
+            return "Add Fail";
         }
         db.close();
-        return "Success";
+        return "Add Success";
     }
 
     public String addCategory(String name) {
@@ -126,10 +97,10 @@ public class DBHelper extends SQLiteOpenHelper {
         contentValues.put(NAME, name);
         long isAdd = db.insert(CATEGORIES_TABLE_NAME, null, contentValues);
         if (isAdd == -1) {
-            return "Fail";
+            return "Add Fail";
         }
         db.close();
-        return "Success";
+        return "Add Success";
     }
 
     public String updatePayment(int id, String name, int categoryId, String detail, String paymentDate, double amount, String description) {
@@ -143,10 +114,10 @@ public class DBHelper extends SQLiteOpenHelper {
         contentValues.put(DESCRIPTION, description);
         long isUpdate = db.update(PAYMENTS_TABLE, contentValues, ID + " = ? ", new String[]{id + ""});
         if (isUpdate > 0) {
-            return "Success";
+            return "Update Success";
         }
         db.close();
-        return "Failed";
+        return "Update Failed";
     }
 
     public String updateCategory(int id, String name) {
@@ -155,9 +126,29 @@ public class DBHelper extends SQLiteOpenHelper {
         contentValues.put(NAME, name);
         long isUpdate = db.update(CATEGORIES_TABLE_NAME, contentValues, ID + " = ? ", new String[]{id + ""});
         if (isUpdate > 0) {
-            return "Success";
+            return "Update Success";
         }
         db.close();
-        return "Failed";
+        return "Update Failed";
+    }
+
+    public String deleteCategory(int id) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        int isDelete = db.delete(CATEGORIES_TABLE_NAME, ID + " = ? ", new String[]{id + ""});
+        if (isDelete > 0) {
+            return "delete success";
+        }
+        db.close();
+        return "delete failed";
+    }
+
+    public String deletePayment(int id) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        int isDelete = db.delete(PAYMENTS_TABLE, ID + " = ? ", new String[]{id + ""});
+        if (isDelete > 0) {
+            return "delete success";
+        }
+        db.close();
+        return "delete failed";
     }
 }

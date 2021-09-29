@@ -19,6 +19,7 @@ public class DrawerMenu extends AppCompatActivity implements NavigationView.OnNa
     BottomNavigationView navigationView;
     FrameLayout frameLayout;
     FragmentManage fragmentManage;
+    List listFr;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -41,7 +42,23 @@ public class DrawerMenu extends AppCompatActivity implements NavigationView.OnNa
 
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-        Log.d("DrawerMenu", String.valueOf(item.getItemId()));
+        switch (item.getItemId()){
+            case R.id.list:
+                getSupportFragmentManager()
+                        .beginTransaction()
+                        .replace(R.id.main_content, listFr, List.class.getName())
+                        .commit();
+                break;
+            case R.id.create:
+                getSupportFragmentManager()
+                        .beginTransaction()
+                        .replace(R.id.main_content, fragmentManage, FragmentManage.class.getName())
+                        .commit();
+                break;
+            default:
+                throw new IllegalStateException("Unexpected value: " + item.getItemId());
+        }
         return false;
     }
+
 }
